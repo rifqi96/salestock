@@ -106,11 +106,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $user = User::find($request->id);
-
-        if ($user) {
-            $user->api_token = null;
-            $user->save();
+        if ( $user = User::find($request->id) ) {
+            $user->logout();
         }
 
         return response()->json([

@@ -35,6 +35,20 @@ class User extends Authenticatable
         return $this->api_token;
     }
 
+    public function isTokenValid($api_token){
+        if( $this->api_token == $api_token ) {
+            return true;
+        }
+
+        $this->logout();
+        return false;
+    }
+
+    public function logout() {
+        $this->api_token = null;
+        return $this->save();
+    }
+
     public function orders() {
         return $this->hasMany('App\Models\Order');
     }
