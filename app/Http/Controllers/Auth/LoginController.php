@@ -104,9 +104,9 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        if ( $user = User::find($request->id) ) {
+        if ( $user = auth()->guard('api')->user() ) {
             $user->logout();
         }
 
