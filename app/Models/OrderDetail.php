@@ -15,6 +15,11 @@ class OrderDetail extends Model
         'order_id','product_id','qty'
     ];
 
+    public function incrementQty($qty) {
+        $this->qty += $qty;
+        return $this->save();
+    }
+
     public function order() {
         return $this->belongsTo('App\Models\Order');
     }

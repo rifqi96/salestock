@@ -14,9 +14,10 @@ class AddAddressDetailsToOrdersTable extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('name')->after('coupon_id');
-            $table->string('phone')->after('coupon_id');
-            $table->string('address')->after('coupon_id');
+            $table->string('address')->after('coupon_id')->nullable();
+            $table->string('phone')->after('coupon_id')->nullable();
+            $table->string('email')->after('coupon_id')->nullable();
+            $table->string('name')->after('coupon_id')->nullable();
         });
     }
 

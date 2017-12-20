@@ -18,7 +18,6 @@ class CreateCouponsTable extends Migration
             $table->string('code')->unique();
             $table->string('type');
             $table->integer('discount');
-            $table->integer('qty');
             $table->date('start_at');
             $table->date('end_at');
             $table->timestamps();
