@@ -19,7 +19,6 @@ class CouponsSeeder extends Seeder
             'code' => 'PERCENTAGE',
             'type' => 'percentage',
             'discount' => 30,
-            'qty' => 10,
             'start_at' => '2017-12-10',
             'end_at' => '2017-12-30'
         ));
@@ -29,7 +28,6 @@ class CouponsSeeder extends Seeder
             'code' => 'NOMINAL',
             'type' => 'nominal',
             'discount' => 50000,
-            'qty' => 10,
             'start_at' => '2017-12-15',
             'end_at' => '2017-12-30'
         ));
