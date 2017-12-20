@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Shipment;
 
 class OrderController extends Controller
 {
@@ -93,8 +98,7 @@ class OrderController extends Controller
                 'data' => "Order does not exists"
             ], 400);
         }
-
-        if(!$order->addCoupon($request->coupon_id)){
+        else if(!$order->addCoupon($request->coupon_id)){
             return response()->json([
                 'status' => 400,
                 'code' => 0,
@@ -141,8 +145,7 @@ class OrderController extends Controller
                 'data' => "Order does not exists"
             ], 400);
         }
-
-        if(!$order->submit($request)){
+        else if(!$order->submit($request)){
             return response()->json([
                 'status' => 400,
                 'code' => 0,
@@ -155,5 +158,105 @@ class OrderController extends Controller
             'code' => 1,
             'data' => $order
         ]);
+    }
+
+    public function submitProof(Request $request, Order $order) {
+        if($order->user_id != auth()->user()->id){
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Order does not exists"
+            ], 403);
+        }
+
+        $file = $request->image;
+        $extension = $file->getClientOriginalExtension();
+        $filename = Carbon::now()->format('Ymdhis') . '_order_id_' . $order->id . '.' . $extension;
+        Storage::disk('uploads')->put($filename,  file_get_contents($file->getRealPath()));
+
+        $order->submitProof($filename);
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => $order
+        ]);
+    }
+
+    public function index()
+    {
+        if(auth()->user()->role != "admin") {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+
+        $orders = Order::with('orderDetails', 'shipment', 'coupon', 'user')->get();
+
+        foreach($orders as $order){
+            $order->user->setHidden(['api_token', 'password']);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => $orders
+        ], 200);
+    }
+
+    public function show(Order $order)
+    {
+        if(auth()->user()->role != "admin") {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+
+        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
+            ->find($order->id);
+
+        $order->user->setHidden(['api_token', 'password']);
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => $order
+        ], 200);
+    }
+
+    public function cancel(Order $order)
+    {
+        if(auth()->user()->role != "admin") {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+        else if($order->status != 'Finalized') {
+            return response()->json([
+                'status' => 400,
+                'code' => 0,
+                'data' => "Order status is invalid to be cancelled"
+            ], 400);
+        }
+        else if(!$order->cancel()){
+            return response()->json([
+                'status' => 400,
+                'code' => 0,
+                'data' => "Any product doesn't exists"
+            ], 400);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'message' => 'Order has been canceled',
+            'data' => $order
+        ], 200);
     }
 }

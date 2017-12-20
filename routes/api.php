@@ -15,9 +15,13 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => 'auth:api'], function() {
     Route::prefix('orders')->group(function() {
+        Route::get('', 'OrderController@index');
+        Route::get('{order}', 'OrderController@show');
         Route::post('add', 'OrderController@addProduct');
         Route::post('coupon', 'OrderController@addCoupon');
         Route::post('submit', 'OrderController@submit');
+        Route::post('{order}/submit/proof', 'OrderController@submitProof');
+        Route::post('{order}/cancel', 'OrderController@cancel');
     });
 
     Route::post('logout', 'Auth\LoginController@logout');

@@ -75,7 +75,7 @@ class Order extends Model
             }
         }
 
-        // Check if all product stocks are sufficient
+        // Check if products exist and all product stocks are sufficient
         foreach($this->orderDetails as $od) {
             $product = Product::find($od->product_id);
             if(!$product) {
@@ -86,12 +86,43 @@ class Order extends Model
             }
         }
 
-        // Validation passes
+        // Validation passes, decrement quantity
         foreach($this->orderDetails as $od) {
             $product = Product::find($od->product_id);
             $product->qty -= $od->qty;
-            $product->save();
+            if(!$product->save()){
+                return false;
+            }
         }
+
+        return $this->save();
+    }
+
+    public function submitProof($filename) {
+        $this->payment_proof = $filename;
+
+        return $this->save();
+    }
+
+    public function cancel() {
+        // Check if products exist
+        foreach($this->orderDetails as $od) {
+            $product = Product::find($od->product_id);
+            if(!$product) {
+                return false;
+            }
+        }
+
+        // Validation passes, restoring quantity
+        foreach($this->orderDetails as $od) {
+            $product = Product::find($od->product_id);
+            $product->qty += $od->qty;
+            if(!$product->save()) {
+                return false;
+            }
+        }
+
+        $this->status = "Canceled";
 
         return $this->save();
     }
