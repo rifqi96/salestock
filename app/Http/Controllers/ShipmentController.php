@@ -44,7 +44,7 @@ class ShipmentController extends Controller
                 'data' => "Order status is invalid to be shipped"
             ], 400);
         }
-        else if($order->shipment()){
+        else if(Shipment::where('order_id', $order->id)->first()){
             return response()->json([
                 'status' => 400,
                 'code' => 0,
