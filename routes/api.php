@@ -17,12 +17,16 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::prefix('orders')->group(function() {
         Route::get('', 'OrderController@index');
         Route::get('{order}', 'OrderController@show');
+        Route::get('{order}/status', 'OrderController@showStatus');
         Route::post('add', 'OrderController@addProduct');
         Route::post('coupon', 'OrderController@addCoupon');
         Route::post('submit', 'OrderController@submit');
         Route::post('{order}/submit/proof', 'OrderController@submitProof');
+        Route::post('{order}/ship', 'ShipmentController@create');
         Route::post('{order}/cancel', 'OrderController@cancel');
     });
+
+    Route::get('shipments/{shipment}/status', 'ShipmentController@showStatus');
 
     Route::post('logout', 'Auth\LoginController@logout');
 });

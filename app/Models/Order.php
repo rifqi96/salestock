@@ -104,6 +104,20 @@ class Order extends Model
         return $this->save();
     }
 
+    public function ship() {
+        $shipment = new Shipment([
+            'order_id' => $this->id,
+            'status' => 'Shipping'
+        ]);
+        if(!$shipment->save()) {
+            return false;
+        }
+
+        $this->status = "Processed";
+
+        return $this->save();
+    }
+
     public function cancel() {
         // Check if products exist
         foreach($this->orderDetails as $od) {

@@ -5,13 +5,76 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use App\Models\Order;
-use App\Models\OrderDetail;
-use App\Models\Shipment;
 
 class OrderController extends Controller
 {
+    public function index()
+    {
+        if(auth()->user()->role != "admin") {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+
+        $orders = Order::with('orderDetails', 'shipment', 'coupon', 'user')->get();
+
+        foreach($orders as $order){
+            $order->user->setHidden(['api_token', 'password']);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => $orders
+        ], 200);
+    }
+
+    public function show(Order $order)
+    {
+        if(auth()->user()->role != "admin") {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+
+        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
+            ->find($order->id);
+
+        $order->user->setHidden(['api_token', 'password']);
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => $order
+        ], 200);
+    }
+
+    public function showStatus(Order $order)
+    {
+        $order = Order::find($order->id);
+
+        if(auth()->user()->id != $order->user_id) {
+            return response()->json([
+                'status' => 403,
+                'code' => 0,
+                'data' => "Forbidden request"
+            ], 403);
+        }
+
+        return response()->json([
+            'status' => 200,
+            'code' => 1,
+            'data' => [
+                'status' => $order->status
+            ]
+        ], 200);
+    }
+
     public function addProduct(Request $request) {
         $validator = $this->getValidationFactory()->make($request->all(), [
             'product_id' => 'required|integer|exists:products,id',
@@ -183,51 +246,6 @@ class OrderController extends Controller
         ]);
     }
 
-    public function index()
-    {
-        if(auth()->user()->role != "admin") {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
-        }
-
-        $orders = Order::with('orderDetails', 'shipment', 'coupon', 'user')->get();
-
-        foreach($orders as $order){
-            $order->user->setHidden(['api_token', 'password']);
-        }
-
-        return response()->json([
-            'status' => 200,
-            'code' => 1,
-            'data' => $orders
-        ], 200);
-    }
-
-    public function show(Order $order)
-    {
-        if(auth()->user()->role != "admin") {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
-        }
-
-        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
-            ->find($order->id);
-
-        $order->user->setHidden(['api_token', 'password']);
-
-        return response()->json([
-            'status' => 200,
-            'code' => 1,
-            'data' => $order
-        ], 200);
-    }
-
     public function cancel(Order $order)
     {
         if(auth()->user()->role != "admin") {
@@ -251,6 +269,11 @@ class OrderController extends Controller
                 'data' => "Any product doesn't exists"
             ], 400);
         }
+
+        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
+            ->find($order->id);
+
+        $order->user->setHidden(['api_token', 'password']);
 
         return response()->json([
             'status' => 200,
