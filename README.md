@@ -37,10 +37,10 @@
             * orders/{order_id}/submit/proof = Submit proof to an order
             * orders/{order_id}/ship = Ship an order
             * orders/{order_id}/cancel = Cancel an order
-    6.  Please download postman collection for more about how to use the API https://drive.google.com/open?id=17PR7c3Sg3cv5MV-EHtB7dyHfumQvjctc (Detail explanation on next chapter)
+    6.  Please download postman collection for more about how to use the API https://drive.google.com/open?id=10GQ_hfIf_D2gQXRyXeiJ9uxbSw3rJis5 (Detail explanation on next chapter)
 	
 ## 2. How to do API test using postman ##
-1.  Download postman collection: https://drive.google.com/open?id=17PR7c3Sg3cv5MV-EHtB7dyHfumQvjctc
+1.  Download postman collection: https://drive.google.com/open?id=10GQ_hfIf_D2gQXRyXeiJ9uxbSw3rJis5
 2.  Import the collection to postman
 3.  Run every request or do functional API test using newman
 
