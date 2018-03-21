@@ -12,11 +12,7 @@ class OrderController extends Controller
     public function index()
     {
         if(auth()->user()->role != "admin") {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
+            abort(403);
         }
 
         $orders = Order::with('orderDetails', 'shipment', 'coupon', 'user')->get();
@@ -25,54 +21,39 @@ class OrderController extends Controller
             $order->user->setHidden(['api_token', 'password']);
         }
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $orders
-        ], 200);
+        ]);
     }
 
     public function show(Order $order)
     {
         if(auth()->user()->role != "admin") {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
+            abort(403);
         }
 
-        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
-            ->find($order->id);
-
-        $order->user->setHidden(['api_token', 'password']);
-
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $order
-        ], 200);
+        ]);
     }
 
     public function showStatus(Order $order)
     {
-        $order = Order::find($order->id);
-
         if(auth()->user()->id != $order->user_id) {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
+            abort(403);
         }
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => [
                 'status' => $order->status
             ]
-        ], 200);
+        ]);
     }
 
     public function addProduct(Request $request) {
@@ -82,11 +63,7 @@ class OrderController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => $validator->messages()
-            ], 400);
+            abort(412, $validator->messages());
         }
 
         $order = Order::where([
@@ -103,11 +80,7 @@ class OrderController extends Controller
                     ->find($id);
             }
             else{
-                return response()->json([
-                    'status' => 400,
-                    'code' => 0,
-                    'data' => "Product stock is insufficient"
-                ], 400);
+                abort(400, "Product stock is insufficient");
             }
         }
         else {
@@ -122,15 +95,11 @@ class OrderController extends Controller
                     ->find($id);
             }
             else{
-                return response()->json([
-                    'status' => 400,
-                    'code' => 0,
-                    'data' => "Product stock is insufficient"
-                ], 400);
+                abort(400, "Product stock is insufficient");
             }
         }
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $order
@@ -144,35 +113,23 @@ class OrderController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => $validator->messages()
-            ], 400);
+            abort(412, $validator->messages());
         }
 
         $order = Order::with('coupon', 'orderDetails')
             ->find($request->id);
 
         if(!$order || $order->user_id != auth()->user()->id || $order->status != "Processing") {
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Order does not exists"
-            ], 400);
+            abort(400, "Order does not exists");
         }
         else if(!$order->addCoupon($request->coupon_id)){
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Coupon is expired"
-            ], 400);
+            abort(400, "Coupon is expired");
         }
 
         $order = Order::with('coupon', 'orderDetails')
             ->find($request->id);
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $order
@@ -188,11 +145,7 @@ class OrderController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => $validator->messages()
-            ], 400);
+            abort(412, $validator->messages());
         }
 
         $order = Order::where([
@@ -202,21 +155,13 @@ class OrderController extends Controller
             ->first();
 
         if(!$order){
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Order does not exists"
-            ], 400);
+            abort(400, "Order does not exists");
         }
         else if(!$order->submit($request)){
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Validation Error: Product stock is insufficient or coupon is expired"
-            ], 400);
+            abort(400, "Validation Error: Product stock is insufficient or coupon is expired");
         }
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $order
@@ -225,11 +170,7 @@ class OrderController extends Controller
 
     public function submitProof(Request $request, Order $order) {
         if($order->user_id != auth()->user()->id){
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Order does not exists"
-            ], 403);
+            abort(400, "Order does not exists");
         }
 
         $file = $request->image;
@@ -239,7 +180,7 @@ class OrderController extends Controller
 
         $order->submitProof($filename);
 
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'data' => $order
@@ -249,37 +190,20 @@ class OrderController extends Controller
     public function cancel(Order $order)
     {
         if(auth()->user()->role != "admin") {
-            return response()->json([
-                'status' => 403,
-                'code' => 0,
-                'data' => "Forbidden request"
-            ], 403);
+            abort(403);
         }
         else if($order->status != 'Finalized') {
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Order status is invalid to be cancelled"
-            ], 400);
+            abort(400,"Order status is invalid to be cancelled");
         }
         else if(!$order->cancel()){
-            return response()->json([
-                'status' => 400,
-                'code' => 0,
-                'data' => "Any product doesn't exists"
-            ], 400);
+            abort(400, "Any product doesn't exists");
         }
 
-        $order = Order::with('orderDetails', 'shipment', 'coupon', 'user')
-            ->find($order->id);
-
-        $order->user->setHidden(['api_token', 'password']);
-
-        return response()->json([
+        return response([
             'status' => 200,
             'code' => 1,
             'message' => 'Order has been canceled',
             'data' => $order
-        ], 200);
+        ]);
     }
 }

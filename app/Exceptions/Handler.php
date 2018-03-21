@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -49,27 +51,62 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        // This will replace our 404 response with
-        // a JSON response.
+        // This will replace our 404 response of MODEL NOT FOUND with a json response
         if ($exception instanceof ModelNotFoundException &&
             $request->wantsJson())
         {
-            return response()->json([
+            return response([
                 'status' => 404,
-                'code' => 0,
-                'data' => 'Resource not found'
+                'code' => $exception->getCode(),
+                'message' => 'Resource not found'
             ], 404);
         }
 
-        return parent::render($request, $exception);
+        // This will replace our 405 response of METHOD NOT ALLOWED with a json response
+        if ($exception instanceof MethodNotAllowedHttpException && $request->wantsJson()){
+            return response([
+                'status' => 405,
+                'code' => $exception->getCode(),
+                'message' => 'Method not allowed'
+            ], 405);
+        }
+
+        // Exception for common error and custom message if any
+        if (method_exists($exception, 'getStatusCode')) {
+            $statusCode = $exception->getStatusCode();
+        } else {
+            $statusCode = 500;
+        }
+
+        switch ($statusCode) {
+            case 404:
+                $message = 'Not Found';
+                break;
+
+            case 403:
+                $message = 'Forbidden Request';
+                break;
+
+            default:
+                $message = $exception->getMessage();
+                break;
+        }
+
+        return response([
+            'status' => $statusCode,
+            'code' => $exception->getCode(),
+            'message' => $message
+        ], $statusCode);
+
+//        return parent::render($request, $exception);
     }
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        return response()->json([
+        return response([
             'status' => 401,
             'code' => 0,
-            'data' => 'Unauthenticated'
+            'message' => 'Unauthenticated'
         ], 401);
     }
 }

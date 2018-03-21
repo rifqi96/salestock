@@ -14,4 +14,8 @@ class Product extends Model
     protected $fillable = [
         'name','price','qty'
     ];
+
+    public function order() {
+        return $this->belongsTo('App\Models\OrderDetail');
+    }
 }
