@@ -17,19 +17,19 @@
         * ``http://rifqi-salestock.esy.es/api/{keyword}``
     5.  In order to use the API, please use URL from point 1 by using format from above instruction and use following available keywords:
         * **GET METHOD**:
-            ** Public is allowed **
+            * ** Public is allowed **
             * products/ = Get All Products List
             * products{product_id} = Get product details
-            ** Needs Admin/User role Authentication **
+            * ** Needs Admin/User role Authentication **
             * orders/ = Get All Orders
             * orders/{order_id} = Get order details
             * orders/{order_id}/status = Get order status
             * shipments/{shipment_id}/status = Get shipment status
         * **POST METHOD**:
-            ** Public is allowed **
+            * ** Public is allowed **
             * register = Register
             * login = Login
-            ** Needs Admin/User role Authentication **
+            * ** Needs Admin/User role Authentication **
             * logout = Logout
             * orders/add = Add product to an order
             * orders/coupon = Add coupon to an order
