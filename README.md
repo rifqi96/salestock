@@ -1,9 +1,5 @@
 # README #
 
-### What is this repository for? ###
-
-* This repository is made for salestock online test purpose.
-
 ## 1. General - How do I access the deployed site? ##
 * Please use following url for api activities: https://snuggled-halyard.000webhostapp.com/api
 * Please follow chapter **2. How to do API test using postman** to use the API
