@@ -1,7 +1,7 @@
 # README #
 
 ## 1. General - How do I access the deployed site? ##
-* Please use following url for api activities: https://snuggled-halyard.000webhostapp.com/api
+* Please use following url for api activities: http://rifqi-salestock.esy.es/api
 * Please follow chapter **2. How to do API test using postman** to use the API
 * Assumptions and steps:
     1.  By default, the application has 3 registered users with following credentials:
@@ -14,16 +14,22 @@
     3.  In order to get authorization token, please use following keyword using post method:
         * ``login``
     4.  To use keywords, please use following format:
-        * ``https://snuggled-halyard.000webhostapp.com/api/{keyword}``
+        * ``http://rifqi-salestock.esy.es/api/{keyword}``
     5.  In order to use the API, please use URL from point 1 by using format from above instruction and use following available keywords:
         * **GET METHOD**:
+            ** Public is allowed **
+            * products/ = Get All Products List
+            * products{product_id} = Get product details
+            ** Needs Admin/User role Authentication **
             * orders/ = Get All Orders
             * orders/{order_id} = Get order details
             * orders/{order_id}/status = Get order status
             * shipments/{shipment_id}/status = Get shipment status
         * **POST METHOD**:
+            ** Public is allowed **
             * register = Register
             * login = Login
+            ** Needs Admin/User role Authentication **
             * logout = Logout
             * orders/add = Add product to an order
             * orders/coupon = Add coupon to an order
